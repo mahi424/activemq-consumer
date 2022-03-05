@@ -1,3 +1,4 @@
+/* eslint-disable-next-line */
 function isMethod(propertyName: string, value: any): boolean {
   return propertyName !== 'constructor' && typeof value === 'function';
 }

@@ -1,22 +1,25 @@
 import { Client, StompConfig, StompHeaders, IMessage } from '@stomp/stompjs';
 import { EventEmitter } from 'events';
+import { WebSocket } from 'ws';
 import * as Debug from 'debug';
+
 import { autoBind } from './bind';
-
 import { TimeoutError } from './errors';
+import { TimeoutResponse, ConsumerOptions, Events } from './interfaces';
 
-const debug = Debug('sqs-consumer');
+const debug = Debug('activemq-consumer');
+// const debug = console.log;
+Object.assign(global, { WebSocket: WebSocket }).WebSocket;
 
 const requiredOptions = [
-  'queueUrl',
-  // only one of handleMessage / handleMessagesBatch is required
+  'destination',
   'handleMessage|handleMessageBatch',
 ];
-
-interface TimeoutResponse {
-  timeout: NodeJS.Timeout;
-  pending: Promise<void>;
+/* eslint-disable */
+function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
+/* eslint-enable */
 
 function createTimeout(duration: number): TimeoutResponse[] {
   let timeout;
@@ -39,29 +42,6 @@ function assertOptions(options: ConsumerOptions): void {
   });
 }
 
-export interface ConsumerOptions {
-  destination: string;
-  stopped?: boolean;
-  // authenticationErrorTimeout?: number;
-  // heartbeatInterval?: number;
-  handleMessageTimeout?: number;
-  recieveStompHeaders: StompHeaders;
-  stompConfing: StompConfig;
-
-  handleMessage?(message: IMessage): Promise<void>;
-}
-
-interface Events {
-  response_processed: [];
-  empty: [];
-  message_received: [IMessage];
-  message_processed: [IMessage];
-  error: [Error, void | IMessage | IMessage[]];
-  timeout_error: [Error, IMessage];
-  processing_error: [Error, IMessage];
-  stopped: [];
-}
-
 export class Consumer extends EventEmitter {
   private handleMessage: (message: IMessage) => Promise<void>;
   private handleMessageTimeout: number;
@@ -80,11 +60,15 @@ export class Consumer extends EventEmitter {
     this.handleMessageTimeout = options.handleMessageTimeout;
     this.stopped = true;
     this.destination = options.destination;
-    this.recieveStompHeaders = options.recieveStompHeaders;
+    this.recieveStompHeaders = options.recieveStompHeaders || {
+      ack: 'client-individual',
+    };
+    this.stompConfig = options.stompConfing;
 
     // this.heartbeatInterval = options.heartbeatInterval;
     // this.authenticationErrorTimeout =
     //   options.authenticationErrorTimeout || 10000;
+    console.log(options);
     const client = new Client(this.stompConfig);
     client.onConnect = function (frame) {
       debug('connected', frame);
@@ -136,11 +120,26 @@ export class Consumer extends EventEmitter {
     return new Consumer(options);
   }
 
+  async connect() {
+    return new Promise(async (resolve) => {
+      this.client.activate();
+      while (!this.client.connected) {
+        await sleep(1000);
+        debug('connecting....', this.client.connected);
+      }
+      // setTimeout(() => {
+      return resolve(true);
+    });
+  }
+
   public start(): void {
     if (this.stopped) {
       debug('Starting consumer');
       this.stopped = false;
-      this.poll();
+      const poll = this.poll;
+      this.connect().then(() => {
+        poll();
+      });
     }
   }
 
@@ -163,7 +162,7 @@ export class Consumer extends EventEmitter {
         message.ack(message.headers);
       } catch (error) {
         this.emitError(error, message);
-        debug.error(error);
+        debug(error);
         debug('error', 'error processing', error);
         message.nack(message.headers);
       }
@@ -210,7 +209,7 @@ export class Consumer extends EventEmitter {
 
   private emitError(err: Error, message: IMessage): void {
     this.emit('error', err, message);
-    // if (err.name === SQSError.name) {
+    // if (err.name === MQError.name) {
     //   this.emit('error', err, message);
     // } else if (err instanceof TimeoutError) {
     //   this.emit('timeout_error', err, message);

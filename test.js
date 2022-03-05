@@ -1,7 +1,3 @@
-# ActiveMQ Consumer
-
-```js
-// test.js
 const { Consumer } = require('./build/src');
 // const constants = require('./secrets');
 
@@ -35,4 +31,3 @@ const app = new Consumer({
 });
 
 app.start();
-```
