@@ -2,6 +2,8 @@
   "name": "activemq-consumer",
   "version": "1.0.0-beta",
   "description": "ActiveMQ Consumer",
+  "main": "build/src/index.js",
+  "types": "build/src/index.d.ts",
   "engines": {
     "node": ">= 16.13 <17"
   },
@@ -36,7 +38,8 @@
     "@stomp/stompjs": "^6.1.2",
     "debug": "^4.3.3",
     "tslib": "~2.3.1",
-    "websocket": "^1.0.34"
+    "websocket": "^1.0.34",
+    "ws": "^8.5.0"
   },
   "volta": {
     "node": "16.13.0"
