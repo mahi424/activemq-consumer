@@ -1,5 +1,10 @@
 import { StompConfig, StompHeaders, IMessage } from '@stomp/stompjs';
 
+export interface TimeoutResponse {
+  timeout: NodeJS.Timeout;
+  pending: Promise<void>;
+}
+
 export interface ConsumerOptions {
   destination: string;
   stopped?: boolean;
@@ -8,7 +13,6 @@ export interface ConsumerOptions {
   handleMessageTimeout?: number;
   recieveStompHeaders: StompHeaders;
   stompConfing: StompConfig;
-
   handleMessage?(message: IMessage): Promise<void>;
 }
 
@@ -21,9 +25,4 @@ export interface Events {
   timeout_error: [Error, IMessage];
   processing_error: [Error, IMessage];
   stopped: [];
-}
-
-export interface TimeoutResponse {
-  timeout: NodeJS.Timeout;
-  pending: Promise<void>;
 }

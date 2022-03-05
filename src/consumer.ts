@@ -1,25 +1,27 @@
-import { Client, StompConfig, StompHeaders, IMessage } from '@stomp/stompjs';
+import {
+  Client,
+  StompConfig,
+  StompHeaders,
+  IMessage,
+  IFrame,
+} from '@stomp/stompjs';
 import { EventEmitter } from 'events';
-import { WebSocket } from 'ws';
 import * as Debug from 'debug';
+import { WebSocket } from 'ws';
 
+import { TimeoutResponse, ConsumerOptions, Events } from './interfaces';
 import { autoBind } from './bind';
 import { TimeoutError } from './errors';
-import { TimeoutResponse, ConsumerOptions, Events } from './interfaces';
 
 const debug = Debug('activemq-consumer');
-// const debug = console.log;
+// const debug = debug;
 Object.assign(global, { WebSocket: WebSocket }).WebSocket;
 
 const requiredOptions = [
   'destination',
+  // only one of handleMessage / handleMessagesBatch is required
   'handleMessage|handleMessageBatch',
 ];
-/* eslint-disable */
-function sleep(ms: number) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
-/* eslint-enable */
 
 function createTimeout(duration: number): TimeoutResponse[] {
   let timeout;
@@ -68,7 +70,7 @@ export class Consumer extends EventEmitter {
     // this.heartbeatInterval = options.heartbeatInterval;
     // this.authenticationErrorTimeout =
     //   options.authenticationErrorTimeout || 10000;
-    console.log(options);
+    debug(options);
     const client = new Client(this.stompConfig);
     client.onConnect = function (frame) {
       debug('connected', frame);
@@ -85,11 +87,11 @@ export class Consumer extends EventEmitter {
       // Bad login/passcode typically will cause an error
       // Complaint brokers will set `message` header with a brief message. Body may contain details.
       // Compliant brokers will terminate the connection after any error
-      console.log('Broker reported error: ' + frame.headers['message']);
-      console.log('Additional details: ' + frame.body);
+      debug('Broker reported error: ' + frame.headers['message']);
+      debug('Additional details: ' + frame.body);
     };
 
-    client.activate();
+    // client.activate();
     this.client = client;
     autoBind(this);
   }
@@ -123,12 +125,12 @@ export class Consumer extends EventEmitter {
   async connect() {
     return new Promise(async (resolve) => {
       this.client.activate();
-      while (!this.client.connected) {
-        await sleep(1000);
-        debug('connecting....', this.client.connected);
+      if (this.client.connected) {
+        return resolve(true);
       }
-      // setTimeout(() => {
-      return resolve(true);
+      this.client.onConnect = (i: IFrame) => {
+        return resolve(i);
+      };
     });
   }
 
