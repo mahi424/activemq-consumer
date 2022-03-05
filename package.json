@@ -1,7 +1,7 @@
 {
-  "name": "node-typescript-boilerplate",
-  "version": "0.0.0",
-  "description": "Minimalistic boilerplate to quick-start Node.js development in TypeScript.",
+  "name": "activemq-consumer",
+  "version": "1.0.0-beta",
+  "description": "ActiveMQ Consumer",
   "engines": {
     "node": ">= 16.13 <17"
   },
@@ -30,10 +30,13 @@
     "test": "jest --coverage",
     "test:watch": "jest --watch"
   },
-  "author": "Jakub Synowiec <jsynowiec@users.noreply.github.com>",
+  "author": "Mahaveer Chouhan <mahi424@users.noreply.github.com>",
   "license": "Apache-2.0",
   "dependencies": {
-    "tslib": "~2.3.1"
+    "@stomp/stompjs": "^6.1.2",
+    "debug": "^4.3.3",
+    "tslib": "~2.3.1",
+    "websocket": "^1.0.34"
   },
   "volta": {
     "node": "16.13.0"
