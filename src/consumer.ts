@@ -1,4 +1,10 @@
-import { Client, StompConfig, StompHeaders, IMessage } from '@stomp/stompjs';
+import {
+  Client,
+  StompConfig,
+  StompHeaders,
+  IMessage,
+  IFrame,
+} from '@stomp/stompjs';
 import { EventEmitter } from 'events';
 import * as Debug from 'debug';
 import { WebSocket } from 'ws';
@@ -16,11 +22,6 @@ const requiredOptions = [
   // only one of handleMessage / handleMessagesBatch is required
   'handleMessage|handleMessageBatch',
 ];
-/* eslint-disable */
-function sleep(ms: number) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
-/* eslint-enable */
 
 function createTimeout(duration: number): TimeoutResponse[] {
   let timeout;
@@ -90,7 +91,7 @@ export class Consumer extends EventEmitter {
       debug('Additional details: ' + frame.body);
     };
 
-    client.activate();
+    // client.activate();
     this.client = client;
     autoBind(this);
   }
@@ -124,12 +125,12 @@ export class Consumer extends EventEmitter {
   async connect() {
     return new Promise(async (resolve) => {
       this.client.activate();
-      while (!this.client.connected) {
-        await sleep(1000);
-        debug('connecting....', this.client.connected);
+      if (this.client.connected) {
+        return resolve(true);
       }
-      // setTimeout(() => {
-      return resolve(true);
+      this.client.onConnect = (i: IFrame) => {
+        return resolve(i);
+      };
     });
   }
 
