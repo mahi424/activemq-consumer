@@ -2,7 +2,7 @@
 
 ```js
 // test.js
-const { Consumer } = require('./build/src');
+const { Consumer } = require('activemq-consumer');
 // const constants = require('./secrets');
 
 const constants = {
@@ -29,6 +29,7 @@ const app = new Consumer({
     heartbeatOutgoing: 4000,
   },
   destination: 'mq_test',
+  // handleMessage is async function
   handleMessage: (message) => {
     console.log(message.body);
   },

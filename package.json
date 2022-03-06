@@ -1,6 +1,6 @@
 {
   "name": "activemq-consumer",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "ActiveMQ Consumer",
   "main": "build/src/index.js",
   "types": "build/src/index.d.ts",
@@ -43,6 +43,7 @@
     "eslint-config-prettier": "~8.3.0",
     "eslint-plugin-jest": "~25.3.0",
     "jest": "~27.4.4",
+    "np": "^7.6.0",
     "prettier": "~2.5.1",
     "rimraf": "~3.0.2",
     "ts-jest": "~27.1.1",
@@ -54,11 +55,14 @@
   },
   "peerDependencies": {
     "@stomp/stompjs": "^6.1.2",
+    "tslib": "~2.3.1",
     "websocket": "^1.0.34",
-    "ws": "^8.5.0",
-    "tslib": "~2.3.1"
+    "ws": "^8.5.0"
   },
   "volta": {
     "node": "16.13.0"
+  },
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org"
   }
 }

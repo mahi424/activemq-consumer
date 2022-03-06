@@ -1,0 +1,12 @@
+node_modules
+coverage
+*.log
+.vscode
+
+.editorconfig
+.eslintignore
+.eslintrc.json
+.git
+.gitignore
+.np-config.js
+.prettierrc
