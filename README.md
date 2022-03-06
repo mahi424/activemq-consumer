@@ -1,5 +1,12 @@
 # ActiveMQ Consumer
 
+## Installation
+
+```bash
+npm install activemq-consumer --save
+```
+
+## Usage
 ```js
 // test.js
 const { Consumer } = require('activemq-consumer');
